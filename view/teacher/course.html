@@ -1,0 +1,16 @@
+<div class="pull-right">
+    <input type="text" ng-model="test.textValue" placeholder="Type something...">
+</div>
+
+<h2>Course &mdash; วิชาที่จัดสอบ</h2>
+
+<ul class="nav nav-tabs">
+    <li ng-class="{active: $routeSegment.name == 'tea.course'}">
+        <a href="#/teacher/course/">List of course</a>
+    </li>
+    <li ng-class="{active: $routeSegment.contains('add')}">
+        <a href="#/teacher/course/add">Add</a>
+    </li>
+</ul>
+
+<div app-view-segment="2" class="anim">List of course</div>
