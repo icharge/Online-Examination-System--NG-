@@ -24,7 +24,6 @@ app.config(function($routeSegmentProvider, $routeProvider) {
 		.when('/teacher/course/:id',		'tea.course.item')
 		//.when('/teacher/course/remove',	'tea.course.remove')
 
-		
 		.when('/student',					'std')
 		.when('/student/course',			'std.course')
 		.when('/student/course/:id',		'std.courseitem')
@@ -82,7 +81,7 @@ app.config(function($routeSegmentProvider, $routeProvider) {
 			})
 			.segment('course', {
 				templateUrl: 'view/teacher/course.html',
-				//controller: 
+				controller: CourseCtrl,
 				resolveFailed: {
 					templateUrl: 'view/error.html',
 					controller: 'ErrorCtrl'
@@ -94,6 +93,7 @@ app.config(function($routeSegmentProvider, $routeProvider) {
 			.within()
 				.segment('item', {
 					templateUrl: 'view/teacher/course/item.html',
+					controller: CourseItemCtrl,
 					dependencies: ['id'],
 					resolveFailed: {
 						templateUrl: 'view/error.html',
@@ -103,6 +103,7 @@ app.config(function($routeSegmentProvider, $routeProvider) {
 						templateUrl: 'view/loading.html'
 					}
 				})
+				// not usse
 				.segment('add', {
 					templateUrl: 'view/teacher/course/add.html'
 				})
@@ -229,18 +230,63 @@ app.config(function($routeSegmentProvider, $routeProvider) {
 		
 		
 	$routeProvider.otherwise({redirectTo: '/'}); 
-}) ;
+});
+
+// Convert str to int
+// usage (EX): {{('120'|int)+2}}
+app.filter('int', function() {
+	return function(input) {
+		return parseInt(input, 10);
+	}
+});
 
 app.value('loader', {show: false});
 
-function MainCtrl($scope, $routeSegment, loader) {
+function MainCtrl($scope, $routeSegment, loader, $location) {
 
 	$scope.$routeSegment = $routeSegment;
 	$scope.loader = loader;
 
+	$scope.go = function ( path ) {
+		$location.path( path );
+	};
+
 	$scope.$on('routeSegmentChange', function() {
 		loader.show = false;
 	})
+}
+
+function CourseCtrl($scope, $routeSegment, $http) {
+	$scope.$routeSegment = $routeSegment;
+	$scope.getData = function() {
+		$http.get('server/getcourselist.php?rand=' + Math.floor(Math.random() * 100))
+		.success(function(data) {
+			$scope.courseList = data;
+		})
+	};
+	$scope.getData();
+}
+
+function CourseItemCtrl($scope, $routeSegment, $http) {
+	$scope.$routeSegment = $routeSegment;
+	$scope.courseid = $routeSegment.$routeParams.id;
+	$scope.getData = function() {
+		$http.get('server/getcourse.php?id=' + $scope.courseid)
+		.success(function(data) {
+			//$scope.courseList = data;
+			if (data.indexOf('Error') != 0)
+			{
+				//alert(data);
+				$scope.coursedata = data;
+			} else {
+				alert('err '+data);
+			}
+		})
+		.error(function(data, status) {
+			alert(status);
+		})
+	};
+	$scope.getData();
 }
 
 function Section1Ctrl($scope, $routeSegment) {
